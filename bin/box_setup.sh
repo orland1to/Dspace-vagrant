@@ -26,26 +26,25 @@ apache() {
 java() {
   echo "Installing java"
   
-    sudo add-apt-repository -y ppa:webupd8team/java
-    sudo add-apt-repository -y  deb http://security.ubuntu.com/ubuntu trusty-security main universe
-    sudo apt-get update
-    sudo apt-get -y upgrade  
+    #sudo add-apt-repository -y ppa:webupd8team/java
+   # sudo apt-get update
+    sudo apt-get upgrade
     echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections 
     echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
-    apt-get -y -s install openjdk-8-jre
+    sudo apt-get -y  install openjdk-8-jre
     
     echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections 
     echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections 
-    apt-get -y -s install openjdk-8-jdk
+    sudo apt-get -y  install openjdk-8-jdk
 
     update-alternatives --config java
+    echo "JAVA_HOME"
+    sudo chmod 777 -R /etc/profile
+    echo"JAVA_HOME='/usr/lib/jvm/java-7-openjdk-amd64/jre'">/etc/profile   
 
+    echo"PATH='$PATH':'$JAVA_HOME/bin'">/etc/profile 
 
-    sudo echo"JAVA_HOME='/usr/lib/jvm/java-7-openjdk-amd64/jre'">/etc/profile   
-
-    sudo echo"PATH='$PATH':'$JAVA_HOME/bin'">/etc/profile 
-
-    sudo export  JAVA_HOME 
+    export  JAVA_HOME 
 
     source /etc/profile 
 
@@ -80,11 +79,11 @@ postgres() {
 
     sudo apt-get install -y postgresql
   
-  
-    echo "host     dspace     dspace     127.0.0.1     255.255.255.255     md5" > /etc/postgresql/9.6/main/pg_hba.conf
-    echo "host     all     all     127.0.0.1/32     md5" > /etc/postgresql/9.6/main/pg_hba.conf
+    sudo chmod 777 -R /etc/postgresql/9.3
+    sudo echo "host     dspace     dspace     127.0.0.1     255.255.255.255     md5" > /etc/postgresql/9.3/main/pg_hba.conf
+    sudo echo "host     all     all     127.0.0.1/32     md5" > /etc/postgresql/9.3/main/pg_hba.conf
 
-    /etc/init.d/tomcat7 start
+    sudo /etc/init.d/tomcat7 start
   
 }
 tomcat() {
@@ -97,6 +96,7 @@ tomcat() {
     sudo apt-get -y install git
     echo "-------------- Clone DSpace"
     git clone https://github.com/RepositorioUTM/DSpace.git
+    cd DSpace
     git checkout dspace-6_x
     git branch -a
     git branch -r
@@ -152,18 +152,18 @@ finalized(){
 }
 
 setup(){
-  update
-  lang_conf
-  apache
-  java
-  maven
-  apache-ant
-  postgres
-  tomcat
-  Dspace-clone
+  #update
+  #lang_conf
+  #apache
+  #java
+  #maven
+  #apache-ant
+  #postgres
+  #tomcat
+  #Dspace-clone
   DB
-  configuraciones
-  finalized
+  #configuraciones
+  #finalized
   cleanup
 }
 

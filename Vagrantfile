@@ -41,7 +41,7 @@ Vagrant.configure(2) do |config|
   # config.vm.network "private_network", type: "dhcp"
    # Port forwarding
   config.vm.network :forwarded_port, guest: 3000, host: 3000 # Django
-  config.vm.network :forwarded_port, guest: 81, host: 9090  
+  config.vm.network :forwarded_port, guest: 80, host: 9091  
 
 
   # # Port forwarding — uncomment this to use NAT instead of DHCP
