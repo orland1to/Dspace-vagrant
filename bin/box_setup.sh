@@ -86,12 +86,14 @@ postgres() {
     sudo /etc/init.d/tomcat7 start
   
 }
+
 tomcat() {
-  
+
     echo "-------------- install tomcat"
     sudo apt-get -y install tomcat7
-  
+
  }
+
  Dspace-clone(){
     sudo apt-get -y install git
     echo "-------------- Clone DSpace"
@@ -106,8 +108,8 @@ tomcat() {
     sudo -u postgres bash -c "psql -c \"CREATE USER dspace WITH PASSWORD 'dspace';\""
     sudo -u postgres bash -c "psql -c \"CREATE DATABASE dspace;\""
     sudo -u postgres bash -c "psql -c \"GRANT ALL ON DATABASE dspace to dspace;\""
-    sudo -u postgres bash -c "psql -c \"ALTER DATABASE dspace owner to dspace;\""
     sudo -u postgres bash -c "psql -c \"CREATE EXTENSION pgcrypto;\""
+    sudo -u postgres bash -c "psql -c \"ALTER DATABASE dspace owner to dspace;\""
     echo " Restarting Postgres server"
     sudo service postgresql restart
     # psql postgres
@@ -158,18 +160,18 @@ finalized(){
 }
 
 setup(){
-  #update
-  #lang_conf
-  #apache
-  #java
-  #maven
-  #apache-ant
-  #postgres
-  #tomcat
+  update
+  lang_conf
+  apache
+  java
+  maven
+  apache-ant
+  tomcat
+  postgres  
   Dspace-clone
   DB
   configuraciones
-  #finalized
+  finalized
   cleanup
 }
 
