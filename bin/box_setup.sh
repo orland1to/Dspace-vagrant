@@ -103,27 +103,33 @@ tomcat() {
  }
  DB(){
     echo "------------- Configuración de la base de datos"
-    psql postgres
-    createuser --username=postgres --no-superuser --pwprompt dspace
-    createdb --username=postgres --owner=dspace --encoding=UNICODE dspace
-    psql --username=postgres dspace -c "CREATE EXTENSION  pgcrypto;"
-    \q
+    sudo -u postgres bash -c "psql -c \"CREATE USER dspace WITH PASSWORD 'dspace';\""
+    sudo -u postgres bash -c "psql -c \"CREATE DATABASE dspace;\""
+    sudo -u postgres bash -c "psql -c \"GRANT ALL ON DATABASE dspace to dspace;\""
+    sudo -u postgres bash -c "psql -c \"ALTER DATABASE dspace owner to dspace;\""
+    sudo -u postgres bash -c "psql -c \"CREATE EXTENSION pgcrypto;\""
+    echo " Restarting Postgres server"
+    sudo service postgresql restart
+    # psql postgres
+    # createuser --username=postgres --no-superuser --pwprompt dspace
+    # createdb --username=postgres --owner=dspace --encoding=UNICODE dspace
+    # psql --username=postgres dspace -c "CREATE EXTENSION  pgcrypto;"
+    # \q
     cd dspace/config/
     cp local.cfg.EXAMPLE local.cfg
 }
 configuraciones(){
 
   echo "------------- Crear directorio de instalación"
-  mkdir dspace -install
+  mkdir dspace-install
   sudo chown  - R tomcat7:tomcat7 /home/dspace/dspace-install/
 
 
   echo "-------------- Construir el paquete de instalación"
-  cd dspace
   mvn package
 
   echo "-------------- Instalar DSpace"
-  cd /dspace/target/dspace-installer
+  cd /target/dspace-installer
   ant -y fresh_install
 
   echo "-------------- desplegar las aplicaciones web"
@@ -160,9 +166,9 @@ setup(){
   #apache-ant
   #postgres
   #tomcat
-  #Dspace-clone
+  Dspace-clone
   DB
-  #configuraciones
+  configuraciones
   #finalized
   cleanup
 }
