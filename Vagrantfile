@@ -34,21 +34,21 @@ Vagrant.configure(2) do |config|
   # Set VM name in Virtualbox
   config.vm.provider "virtualbox" do |v|
     v.name = VM_NAME
-    v.memory = 2048
+    v.memory = 2048#change if your computer  not have enougth
   end
 
   #DHCP — comment this out if planning on using NAT instead
   # config.vm.network "private_network", type: "dhcp"
    # Port forwarding
-  config.vm.network :forwarded_port, guest: 3000, host: 3000 # Django
-  config.vm.network :forwarded_port, guest: 80, host: 9091  
+  config.vm.network :forwarded_port, guest: 3000, host: 3001 
+  config.vm.network :forwarded_port, guest: 8080, host: 8080  
 
 
   # # Port forwarding — uncomment this to use NAT instead of DHCP
   # config.vm.network "forwarded_port", guest: 80, host: VM_PORT
 
   # Sync folder
-  config.vm.synced_folder ".", "/home/dspaceUTM/"
+  config.vm.synced_folder ".", "/dspace"
 
 
 

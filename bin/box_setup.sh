@@ -26,8 +26,8 @@ apache() {
 java() {
   echo "Installing java"
   
-    #sudo add-apt-repository -y ppa:webupd8team/java
-   # sudo apt-get update
+    sudo add-apt-repository -y ppa:webupd8team/java
+    sudo apt-get update
     sudo apt-get upgrade
     echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections 
     echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
@@ -36,15 +36,15 @@ java() {
     echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections 
     echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections 
     sudo apt-get -y  install openjdk-8-jdk
-
-    update-alternatives --config java
+    sudo apt install oracle-java8-set-default
+    sudo update-alternatives --set java /usr/lib/jvm/java-8-oracle/jre/bin/java 
     echo "JAVA_HOME"
+    echo $JAVA_HOME 
     sudo chmod 777 -R /etc/profile
-    echo"JAVA_HOME='/usr/lib/jvm/java-7-openjdk-amd64/jre'">/etc/profile   
+    
+    echo "JAVA_HOME='/usr/lib/jvm/java-8-oracle'">/etc/profile   
 
-    echo"PATH='$PATH':'$JAVA_HOME/bin'">/etc/profile 
-
-    export  JAVA_HOME 
+    echo "PATH='$PATH':'$JAVA_HOME/bin'">/etc/profile 
 
     source /etc/profile 
 
@@ -75,22 +75,32 @@ apache-ant() {
 postgres() {
   
   
-     echo "-------------- installing postgres"
-
-    sudo apt-get install -y postgresql
+     echo "-------------- installing postgres 11 currently"
+    sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+    wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
+    sudo apt-get -y update && sudo apt-get -y upgrade
+    sudo apt-get install -y postgresql postgresql-contrib libpq-dev pgadmin3
+   
   
-    sudo chmod 777 -R /etc/postgresql/9.3
-    sudo echo "host     dspace     dspace     127.0.0.1     255.255.255.255     md5" > /etc/postgresql/9.3/main/pg_hba.conf
-    sudo echo "host     all     all     127.0.0.1/32     md5" > /etc/postgresql/9.3/main/pg_hba.conf
-
-    sudo /etc/init.d/tomcat7 start
+    sudo chmod 777 -R /etc/postgresql/11
+    sudo echo "host     dspace     dspace     127.0.0.1     255.255.255.255     md5" >> /etc/postgresql/11/main/pg_hba.conf
+    sudo echo "host     all     all     127.0.0.1/32     md5" >> /etc/postgresql/11/main/pg_hba.conf
+    sudo echo "listen_addresses = 'localhost' ">> /etc/postgresql/11/main/postgresql.conf
+    sudo service postgresql restart
+    
   
 }
 tomcat() {
   
     echo "-------------- install tomcat"
     sudo apt-get -y install tomcat7
-  
+    sudo chmod -R 777 /etc/default/tomcat7
+    echo "JAVA_HOME=/usr/lib/jvm/java-8-oracle/jre">>/etc/default/tomcat7
+    
+    sudo /etc/init.d/tomcat7 start
+    
+
+
  }
  Dspace-clone(){
     sudo apt-get -y install git
@@ -106,8 +116,9 @@ tomcat() {
     sudo -u postgres bash -c "psql -c \"CREATE USER dspace WITH PASSWORD 'dspace';\""
     sudo -u postgres bash -c "psql -c \"CREATE DATABASE dspace;\""
     sudo -u postgres bash -c "psql -c \"GRANT ALL ON DATABASE dspace to dspace;\""
+    sudo -u postgres bash -c "psql -d dspace -c \"CREATE EXTENSION IF NOT EXISTS pgcrypto;\""
     sudo -u postgres bash -c "psql -c \"ALTER DATABASE dspace owner to dspace;\""
-    sudo -u postgres bash -c "psql -c \"CREATE EXTENSION pgcrypto;\""
+    
     echo " Restarting Postgres server"
     sudo service postgresql restart
     # psql postgres
@@ -115,61 +126,70 @@ tomcat() {
     # createdb --username=postgres --owner=dspace --encoding=UNICODE dspace
     # psql --username=postgres dspace -c "CREATE EXTENSION  pgcrypto;"
     # \q
-    cd dspace/config/
-    cp local.cfg.EXAMPLE local.cfg
+    
+    cp /home/vagrant/DSpace/dspace/config/local.cfg.EXAMPLE /home/vagrant/DSpace/dspace/config/local.cfg
+    
 }
 configuraciones(){
 
   echo "------------- Crear directorio de instalación"
-  mkdir dspace-install
-  sudo chown  - R tomcat7:tomcat7 /home/dspace/dspace-install/
-
+  cd 
+  sudo mkdir  /dspace
+  sudo chmod -R 777 /dspace
+  sudo chown  -R tomcat7:tomcat7 /dspace
 
   echo "-------------- Construir el paquete de instalación"
+  cd /home/vagrant/DSpace
   mvn package
-
+}
+instalar(){
   echo "-------------- Instalar DSpace"
-  cd /target/dspace-installer
-  ant -y fresh_install
-
-  echo "-------------- desplegar las aplicaciones web"
-  cp -r /home/dspace/dspace-install/webapps/* /var/lib/tomcat7/webapps/
-
-  sudo chown -R tomcat8:tomcat8 /home/dspace/dspace-install/
-
+  sudo chmod 777 -R /home/vagrant/DSpace/dspace/target/dspace-installer
+  cd /home/vagrant/DSpace/dspace/target/dspace-installer
+  ant fresh_install
+}
+personalizar(){
   echo "--------------- crear cuenta del administrador"
-  /home/dspace/dspace-install/bin/dspace create-administrator
+  sudo chown -R tomcat7:tomcat7 /dspace
+  sudo chmod 777 -R /dspace
+  
 
     echo "--------------- Copiar los archivos de personalización de interfaz"
-
+    sudo sed -i 's|appBase="webapps"|appBase="/dspace/webapps"|g' /etc/tomcat7/server.xml
+    echo"-----------------------------------/n-------------/n---------------------aumentando memoria "
+    sudo sed -i 's|JAVA_OPTS="-Djava.awt.headless=true |#JAVA_OPTS="-Xmx1024m -Dfile.encoding=UTF-8"|g' /etc/default/tomcat7
+    sudo echo "JAVA_OPTS=\"-Djava.awt.headless=true -Dfile.encoding=UTF-8 -server -Xms1536m -Xmx1536m -XX:NewSize=512m -XX:MaxNewSize=1024m -XX:PermSize=256m -XX:MaxPermSize=1024m -XX:+DisableExplicitGC\"">>/etc/default/tomcat7
 
   echo "--------------- Reiniciar tomcat"
 
-  /etc/init.d/tomcat7 stop
+ sudo /etc/init.d/tomcat7 stop
 
-  /etc/init.d/tomcat7 start
+ sudo /etc/init.d/tomcat7 start
 }
 cleanup() {
   sudo apt-get -y autoremove && sudo apt-get autoclean
 }
 
 finalized(){
-  echo "cd /home/dspace/" >> ~/.bashrc
+  echo "cd /dspace" >> ~/.bashrc
+  echo "sudo /etc/init.d/tomcat7 start"
 }
 
 setup(){
-  #update
-  #lang_conf
-  #apache
-  #java
-  #maven
-  #apache-ant
-  #postgres
-  #tomcat
+  update
+  lang_conf
+  apache
+  java
+  maven
+  apache-ant
+  postgres
+  tomcat
   Dspace-clone
   DB
   configuraciones
-  #finalized
+  instalar
+  personalizar
+  finalized
   cleanup
 }
 
