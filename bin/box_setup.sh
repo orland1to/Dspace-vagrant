@@ -156,7 +156,7 @@ personalizar(){
 
     echo "--------------- Copiar los archivos de personalización de interfaz"
     sudo sed -i 's|appBase="webapps"|appBase="/dspace/webapps"|g' /etc/tomcat7/server.xml
-    echo"-----------------------------------/n-------------/n---------------------aumentando memoria "
+    echo "-----------------------------------/n-------------/n---------------------aumentando memoria "
     sudo sed -i 's|JAVA_OPTS="-Djava.awt.headless=true |#JAVA_OPTS="-Xmx1024m -Dfile.encoding=UTF-8"|g' /etc/default/tomcat7
     sudo echo "JAVA_OPTS=\"-Dfile.encoding=UTF-8 -server -Xms1536m -Xmx1536m -XX:NewSize=512m -XX:MaxNewSize=1024m -XX:PermSize=512m -XX:MaxPermSize=1024m -XX:+DisableExplicitGC\"">>/etc/default/tomcat7
 
