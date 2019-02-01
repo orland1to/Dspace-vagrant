@@ -103,6 +103,8 @@ tomcat() {
 
  }
  Dspace-clone(){
+    cd 
+    sudo chmor -R 777 .
     sudo apt-get -y install git
     echo "-------------- Clone DSpace"
     git clone https://github.com/RepositorioUTM/DSpace.git
@@ -110,6 +112,9 @@ tomcat() {
     git checkout dspace-6_x
     git branch -a
     git branch -r
+    cp /home/vagrant/DSpace/dspace/config/local.cfg.EXAMPLE /home/vagrant/DSpace/dspace/config/local.cfg
+    sudo sed -i 's|dspace.dir=/dspace|dspace.dir=/home/vagrant/install|g' /home/vagrant/DSpace/dspace/config/local.cfg
+    sudo sed -i 's|dspace.name = DSpace at My University|dspace.name = DSpace at UTM|g' /home/vagrant/DSpace/dspace/config/local.cfg
  }
  DB(){
     echo "------------- Configuración de la base de datos"
@@ -127,16 +132,16 @@ tomcat() {
     # psql --username=postgres dspace -c "CREATE EXTENSION  pgcrypto;"
     # \q
     
-    cp /home/vagrant/DSpace/dspace/config/local.cfg.EXAMPLE /home/vagrant/DSpace/dspace/config/local.cfg
+    
     
 }
 configuraciones(){
 
   echo "------------- Crear directorio de instalación"
   cd 
-  sudo mkdir  /dspace
-  sudo chmod -R 777 /dspace
-  sudo chown  -R tomcat7:tomcat7 /dspace
+  sudo mkdir  /home/vagrant/install
+  sudo chmod -R 777 /home/vagrant/install
+  sudo chown  -R tomcat7:tomcat7 /home/vagrant/install
 
   echo "-------------- Construir el paquete de instalación"
   cd /home/vagrant/DSpace
@@ -151,14 +156,15 @@ instalar(){
 personalizar(){
   echo "--------------- crear cuenta del administrador"
   sudo chown -R tomcat7:tomcat7 /dspace
-  sudo chmod 777 -R /dspace
-  
+  sudo chmod 777 -R /home/vagrant/install
+  #echo -e "orlandosalvadorcamarillomoreno@gmail.com\nOrlando\nCamarillo" | dspace
+  #/dspace/bin/dspace  create-administrator 
 
-    echo "--------------- Copiar los archivos de personalización de interfaz"
-    sudo sed -i 's|appBase="webapps"|appBase="/dspace/webapps"|g' /etc/tomcat7/server.xml
-    echo"-----------------------------------/n-------------/n---------------------aumentando memoria "
+    echo "---------------apuntar tomcat a  los archivos de personalización de interfaz"
+    sudo sed -i 's|appBase="webapps"|appBase="/home/vagrant/install/webapps"|g' /etc/tomcat7/server.xml
+    echo "-----------------------------------/n-------------/n---------------------aumentando memoria "
     sudo sed -i 's|JAVA_OPTS="-Djava.awt.headless=true |#JAVA_OPTS="-Xmx1024m -Dfile.encoding=UTF-8"|g' /etc/default/tomcat7
-    sudo echo "JAVA_OPTS=\"-Djava.awt.headless=true -Dfile.encoding=UTF-8 -server -Xms1536m -Xmx1536m -XX:NewSize=512m -XX:MaxNewSize=1024m -XX:PermSize=256m -XX:MaxPermSize=1024m -XX:+DisableExplicitGC\"">>/etc/default/tomcat7
+    sudo echo "JAVA_OPTS=\"-Djava.awt.headless=true -Dfile.encoding=UTF-8 -server -Xms512m -Xmx512m -XX:NewSize=512m -XX:MaxNewSize=512m -XX:PermSize=512m -XX:MaxPermSize=512m -XX:+DisableExplicitGC\"">>/etc/default/tomcat7
 
   echo "--------------- Reiniciar tomcat"
 
@@ -171,8 +177,7 @@ cleanup() {
 }
 
 finalized(){
-  echo "cd /dspace" >> ~/.bashrc
-  echo "sudo /etc/init.d/tomcat7 start"
+  echo "cd /vagrant/" >> ~/.bashrc
 }
 
 setup(){

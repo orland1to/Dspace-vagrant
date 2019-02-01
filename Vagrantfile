@@ -6,7 +6,7 @@
 VAGRANT_BOX = 'ubuntu/trusty64'
 
 # Memorable name for your
-VM_NAME = 'Dspace'
+VM_NAME = 'Dspace2'
 
 # VM User — 'vagrant' by default
 VM_USER = 'vagrant'
@@ -35,6 +35,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |v|
     v.name = VM_NAME
     v.memory = 2048#change if your computer  not have enougth
+    v.cpus = 3
   end
 
   #DHCP — comment this out if planning on using NAT instead
@@ -46,18 +47,18 @@ Vagrant.configure(2) do |config|
 
   # # Port forwarding — uncomment this to use NAT instead of DHCP
   # config.vm.network "forwarded_port", guest: 80, host: VM_PORT
-
-  # Sync folder
-  config.vm.synced_folder ".", "/dspace"
-
-
-
   # Disable default Vagrant folder, use a unique path per project
-  config.vm.synced_folder '.', '/home/'+VM_USER+'', disabled: true
+  config.vm.synced_folder '.', '/home/'+VM_USER+''
+  # Sync folder
+
+
+
+
+
 
   # Install Docker-ce
    config.vm.provision "shell", privileged: false, run: "once",
-  path: "bin/box_setup.sh",
+  path: "setup/box_setup.sh",
   env: {
     "LC_ALL"   => "en_US.UTF-8",
     "LANG"     => "en_US.UTF-8",
