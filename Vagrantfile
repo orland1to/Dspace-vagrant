@@ -37,10 +37,12 @@ Vagrant.configure(2) do |config|
     v.memory = 2048#change if your computer  not have enougth
     v.cpus = 3
   end
-
+   
   #DHCP — comment this out if planning on using NAT instead
   # config.vm.network "private_network", type: "dhcp"
    # Port forwarding
+  config.vm.boot_timeout = 300
+ 
   config.vm.network :forwarded_port, guest: 3000, host: 3001 
   config.vm.network :forwarded_port, guest: 8080, host: 8080  
 
@@ -48,7 +50,7 @@ Vagrant.configure(2) do |config|
   # # Port forwarding — uncomment this to use NAT instead of DHCP
   # config.vm.network "forwarded_port", guest: 80, host: VM_PORT
   # Disable default Vagrant folder, use a unique path per project
-  config.vm.synced_folder '.', '/home/'+VM_USER+''
+  config.vm.synced_folder '.', '/home/'+VM_USER+'', :mount_options => ["dmode=777,fmode=777"]
   # Sync folder
 
 
