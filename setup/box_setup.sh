@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+  #!/usr/bin/env bash
 
 update() {
   echo "Updating box software"
@@ -165,6 +165,7 @@ personalizar(){
     echo "-----------------------------------/n-------------/n---------------------aumentando memoria "
     sudo sed -i 's|JAVA_OPTS="-Djava.awt.headless=true |#JAVA_OPTS="-Xmx1024m -Dfile.encoding=UTF-8"|g' /etc/default/tomcat7
     sudo echo "JAVA_OPTS=\"-Djava.awt.headless=true -Dfile.encoding=UTF-8 -server -Xms512m -Xmx512m -XX:NewSize=512m -XX:MaxNewSize=512m -XX:PermSize=512m -XX:MaxPermSize=512m -XX:+DisableExplicitGC\"">>/etc/default/tomcat7
+
 
   echo "--------------- Reiniciar tomcat"
 
