@@ -158,7 +158,7 @@ personalizar(){
   sudo chown -R tomcat7:tomcat7 /home/vagrant/install
   sudo chmod 777 -R /home/vagrant/install
   #echo -e "orlandosalvadorcamarillomoreno@gmail.com\nOrlando\nCamarillo" | dspace
-  #/dspace/bin/dspace  create-administrator 
+  #/home/vagrant/install/bin/dspace  create-administrator 
 
     echo "---------------apuntar tomcat a  los archivos de personalización de interfaz"
     sudo sed -i 's|appBase="webapps"|appBase="/home/vagrant/install/webapps"|g' /etc/tomcat7/server.xml
